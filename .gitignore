@@ -1,0 +1,20 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editors
+.vscode/
+.idea/
+*.swp
+
+# Generated locally from tools/font.ttf
+tools/svgs/
+tools/font.json
+
+# Local experiments
+*.local.*
