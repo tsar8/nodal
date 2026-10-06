@@ -18,7 +18,7 @@ can exist, and a foundation for anyone who wants to take it further.
 - **Gliph** — the slot-based modular writing system.
   → `docs/Nodal_glyph-specification.md`
 - **Web renderer** — live demo of the Gliph cells.
-  → https://github.com/tsar8/nodal
+  → https://tsar8.github.io/nodal/
 
 ## Background
 
