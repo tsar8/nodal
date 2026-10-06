@@ -1,3 +1,5 @@
+[![Validate dictionary](https://github.com/tsar8/nodal/actions/workflows/validate.yml/badge.svg)](https://github.com/tsar8/nodal/actions/workflows/validate.yml)
+
 # Nodal
 
 Nodal is a personal design exploration of what a language could look like
