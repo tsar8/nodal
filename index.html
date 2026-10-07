@@ -139,20 +139,21 @@
     color: var(--ink);
   }
   .pauses-row {
+    margin-top: 60px;
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 8px;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px 12px;
     align-items: end;
   }
   .pause-item { text-align: center; }
   .pause-item .key {
     font-family: ui-monospace, monospace;
-    font-size: 13px;
+    font-size: 24px;
     color: var(--ink-faint);
-    margin-bottom: 4px;
+    margin-bottom: 24px;
     height: 18px;
   }
-  .pause-item svg { width: 100%; max-width: 48px; height: auto; color: var(--ink); }
+  .pause-item svg { width: 100%; max-width: 144px; height: auto; color: var(--ink); }
 
   /* ─── CTA ───────────────────────────────────────── */
   .cta-block {
