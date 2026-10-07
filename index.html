@@ -6,8 +6,8 @@
   <title>Gliph — Nodal Modular Cell Renderer</title>
   <style>
     :root {
-      --s: 1;              /* масштаб экрана */
-      --ps: 0.8;           /* масштаб печати */
+      --s: 1;              /* screen scale */
+      --ps: 0.8;           /* print scale */
       --cell-base: 100px;
       --gap-base: 10px;
       --pron-base: 11px;
@@ -125,11 +125,26 @@
     .cell.pause line {
       stroke: var(--dim);
     }
+    .cell.pause.sentence line {
+      stroke: var(--stress);   
+    }
+    .cell.pause .dot {
+      fill: var(--dim);
+    }
+    body.dense .cell.pause .dot {
+      fill: var(--ink);
+      opacity: 0.25;
+    }
+    body.dense .cell.pause.sentence line {
+      stroke: var(--stress);
+      opacity: 0.55;
+      stroke-width: 2;
+    }
+
     .word {
       display: contents;
-      gap: 10px;
       align-items: flex-end;
-      flex-wrap: wrap;        /* по умолчанию разрешаем перенос внутри слова */
+      flex-wrap: wrap;        /* by default, allow wrapping inside a word */
     }
     .word.nowrap {
       display: flex;
@@ -140,7 +155,7 @@
     body.dense .row { gap: calc(6px * var(--s)); margin-bottom: calc(14px * var(--s)); }
     body.dense .word.nowrap { gap: calc(6px * var(--s)); }
     body.dense .pron { font-size: calc(10px * var(--s)); margin-bottom: 2px; }
-    /* ─── Плотный режим (как в книге) ─── */
+    /* ─── Dense mode (book-like) ─── */
     body.dense .cell {
       border: none;
       background: transparent;
@@ -174,8 +189,9 @@
       .controls, .presets, .legend, header .tagline, footer { display: none !important; }
       body { padding: 0; background: #fff; color: #000; max-width: none; }
       .cell { border-color: #bbb; background: #fff; }
-      .cell.empty, .cell.pause { opacity: .6; }
-      .cell.pause line { stroke: #888 !important; }
+      .cell.empty { opacity: .6; }
+      .cell.pause line { stroke: currentColor !important; }
+      .cell.pause .dot  { fill:   currentColor !important; }
       .pron { color: #555; }
       .pron .st { color: #000; }
       .cell path { fill: #000 !important; }
@@ -215,7 +231,7 @@
     <span class="d">derivational prefix</span>
     <span class="r">root (stress in <b style="color:var(--stress)">bold</b>)</span>
     <span class="s">suffix</span>
-    <span class="z">pause marker</span>
+    <span class="z">| micro · || medium · ||: colon · ||| clause · |||| . · |||/ ! · |||\ ?</span>
   </div>
 
   <div id="out"></div>
@@ -269,7 +285,7 @@
       return 'var(--accent-root)';
     }
 
-    // ─── Произношение: ударение на первый слог корня ────────────
+    // ─── Pronunciation: stress falls on the first syllable of the root ───
     const VOWELS = new Set('aeiouáéíóú');
 
     function pronHTML(m) {
@@ -347,39 +363,76 @@
     }
 
     function renderSpace() {
-      return `<div class="cell-col">
+      return `<div class="cell-col" data-space="1">
                 <div class="pron">&nbsp;</div>
                 <svg class="cell empty" viewBox="0 ${VB_Y} 100 ${VB_H}"
                      style="aspect-ratio: 100 / ${VB_H}"></svg>
               </div>`;
     }
 
-    // ─── Пауза: 1–3 вертикальные линии ──────────────────────────
-    function renderPause(count) {
-      // Раскладка линий по позициям B, C, D.
-      // 1 → C (центр); 2 → B, D (по краям); 3 → B, C, D.
-      const xs = count === 1 ? [50]
-               : count === 2 ? [22, 78]
-               :               [22, 50, 78];
+    // ─── Pause ─────
+    function renderPause(bars, mode = null) {
+      const xs = bars === 1 ? [50]
+              : bars === 2 ? [22, 78]
+              :              [22, 50, 78];
       const y1 = VB_Y + 3;
       const y2 = VB_Y + VB_H - 3;
-      const lines = xs.map(x =>
+
+      let lines = xs.map(x =>
         `<line x1="${x}" y1="${y1}" x2="${x}" y2="${y2}"
-               stroke-width="2.5" stroke-linecap="round"/>`
+              stroke-width="2.5" stroke-linecap="round"/>`
       ).join('');
+
+      const yMid = (y1 + y2) / 2;
+      if (mode === 'neutral') {
+        lines += `<line x1="22" y1="${yMid.toFixed(2)}" x2="78" y2="${yMid.toFixed(2)}"
+                      stroke-width="2.5" stroke-linecap="round"/>`;
+      } else if (mode === 'excl') {
+        lines += `<line x1="22" y1="${y2}" x2="78" y2="${y1}"
+                      stroke-width="2.5" stroke-linecap="round"/>`;
+      } else if (mode === 'qst') {
+        lines += `<line x1="22" y1="${y1}" x2="78" y2="${y2}"
+                      stroke-width="2.5" stroke-linecap="round"/>`;
+      } else if (mode === 'colon') {
+        // Bottom dot anchored at slot [C] (x = 50, baseline = 74);
+        // top dot 8 units above — the colon reads as a vertical pair.
+        const cyBottom = SLOT.C.baseline;   // 74
+        const cyTop    = cyBottom - 8;      // 66
+        lines += `<circle class="dot" cx="50" cy="${cyBottom}" r="3"/>`
+              + `<circle class="dot" cx="50" cy="${cyTop}" r="3"/>`;
+      }
+
+      const label = '|'.repeat(bars) + (
+        mode === 'neutral' ? '|'  :
+        mode === 'excl'    ? '/'  :
+        mode === 'qst'     ? '\\' :
+        mode === 'colon'   ? ':'  : ''
+      );
+
       return `<div class="cell-col">
-                <div class="pron">${'|'.repeat(count)}</div>
+                <div class="pron">${label}</div>
                 <svg class="cell pause" viewBox="0 ${VB_Y} 100 ${VB_H}"
-                     style="aspect-ratio: 100 / ${VB_H}">${lines}</svg>
+                    style="aspect-ratio: 100 / ${VB_H}">${lines}</svg>
               </div>`;
     }
-
-    // ─── Парсинг и рендер ───────────────────────────────────────
+    // ─── Parsing and rendering ──────────────────────────────────
     const state = { nobreak: false, dense: false };
+
+    const PUNCT_MAP = {
+      '.': () => renderPause(3, 'neutral'),
+      '!': () => renderPause(3, 'excl'),
+      '?': () => renderPause(3, 'qst'),
+      ':': () => renderPause(2, 'colon'),
+      ',': () => renderPause(1),
+      ';': () => renderPause(2),
+    };
 
     function render(text) {
       const out = document.getElementById('out');
       out.innerHTML = '';
+
+      // Suppress whitespace around punctuation and pause markers.
+      text = text.replace(/\s*([.,!?;:]|\|+)\s*/g, '$1');
 
       const row = document.createElement('div');
       row.className = 'row';
@@ -391,40 +444,87 @@
           row.insertAdjacentHTML('beforeend', renderSpace());
           continue;
         }
-        // Разбиваем токен по паузам |+ .
-        const parts = t.split(/(\|+)/);
+        // Split the token on pause markers |+ AND on punctuation . , ! ? ; :
+        const parts = t.split(/(\|+|[.,!?;:])/);
         for (const p of parts) {
           if (!p) continue;
+
           if (/^\|+$/.test(p)) {
-            row.insertAdjacentHTML('beforeend', renderPause(p.length));
-          } else {
-            // Все морфемы одного слова → в один .word (flex-группа).
-            const word = document.createElement('div');
-            word.className = 'word' + (state.nobreak ? ' nowrap' : '');
-            for (const m of p.split('-')) {
-              if (!m) continue;
-              word.insertAdjacentHTML('beforeend', renderMorpheme(m));
-            }
-            row.appendChild(word);
+            // Literal pipes in input: |||| → neutral sentence end
+            const n = Math.min(p.length, 3);
+            const mode = p.length >= 4 ? 'neutral' : null;
+            row.insertAdjacentHTML('beforeend', renderPause(n, mode));
+            continue;
           }
+
+          if (PUNCT_MAP[p]) {
+            row.insertAdjacentHTML('beforeend', PUNCT_MAP[p]());
+            continue;
+          }
+
+          // Otherwise: a word (possibly multi-morpheme via hyphen)
+          const word = document.createElement('div');
+          word.className = 'word' + (state.nobreak ? ' nowrap' : '');
+          for (const m of p.split('-')) {
+            if (!m) continue;
+            word.insertAdjacentHTML('beforeend', renderMorpheme(m));
+          }
+          row.appendChild(word);
         }
       }
       out.appendChild(row);
+
+      // Hide space cells that ended up at the start of a wrapped line.
+      requestAnimationFrame(collapseWrappedSpaces);
     }
     // ────────────────────────────────────────────────────────────
+
+    // ─── Hide "space" cells when they land at the start of a line ──
+    function collapseWrappedSpaces() {
+      const row = document.querySelector('#out .row');
+      if (!row) return;
+
+      // Reset previous state (so re-layout works after resize / mode change).
+      row.querySelectorAll('.cell-col').forEach(c => { c.style.display = ''; });
+
+      // Iterate: hiding one leading space can pull following items up,
+      // which may un-wrap them (and possibly expose a new leading space).
+      let changed = true;
+      let guard = 0;
+      while (changed && guard++ < 20) {
+        changed = false;
+        const cells = [...row.querySelectorAll('.cell-col')]
+          .filter(c => c.style.display !== 'none');
+
+        for (let i = 1; i < cells.length; i++) {
+          const cur  = cells[i];
+          const prev = cells[i - 1];
+          if (!cur.dataset.space) continue;               // only space cells
+          if (cur.offsetTop > prev.offsetTop + 1) {       // wrapped to a new line
+            cur.style.display = 'none';
+            changed = true;
+            break;                                        // restart the scan
+          }
+        }
+      }
+    }
 
     document.getElementById('theme').addEventListener('click', () => {
       const cur = document.documentElement.dataset.theme;
       document.documentElement.dataset.theme = cur === 'light' ? 'dark' : 'light';
+      requestAnimationFrame(collapseWrappedSpaces);
     });
 
     document.getElementById('pdf').addEventListener('click', () => {
+      // Make sure layout is finalised before printing.
+      collapseWrappedSpaces();
       window.print();
     });
     document.getElementById('nopron').addEventListener('click', (e) => {
       const on = document.body.classList.toggle('no-pron');
       e.target.style.borderColor = on ? 'var(--accent-prefix)' : '';
       e.target.style.color       = on ? 'var(--accent-prefix)' : '';
+      requestAnimationFrame(collapseWrappedSpaces);
     });
     document.getElementById('nobreak').addEventListener('click', (e) => {
       state.nobreak = !state.nobreak;
@@ -438,6 +538,7 @@
       document.body.classList.toggle('dense', state.dense);
       e.target.style.borderColor = state.dense ? 'var(--accent-prefix)' : '';
       e.target.style.color       = state.dense ? 'var(--accent-prefix)' : '';
+      requestAnimationFrame(collapseWrappedSpaces);
     });
     const scaleEl       = document.getElementById('scale');
     const printScaleEl  = document.getElementById('printScale');
@@ -448,17 +549,26 @@
     function applyScales() {
       const s  = parseFloat(scaleEl.value);
       const ps = parseFloat(printScaleEl.value);
-      // Ставим переменные на #out, а не на :root — тогда медийное правило
-      // @media print { #out { --s: var(--ps); } } сработает поверх inline.
+      // Set the variables on #out rather than :root — this way the media rule
+      // @media print { #out { --s: var(--ps); } } overrides the inline value.
       outEl.style.setProperty('--s', s);
       outEl.style.setProperty('--ps', ps);
       scaleVal.textContent      = s.toFixed(2) + '×';
       printScaleVal.textContent = ps.toFixed(2) + '×';
+      requestAnimationFrame(collapseWrappedSpaces);
     }
 
     scaleEl.addEventListener('input', applyScales);
     printScaleEl.addEventListener('input', applyScales);
     applyScales();
+
+    // Re-run the wrap check whenever the viewport changes.
+    window.addEventListener('resize', () => {
+      requestAnimationFrame(collapseWrappedSpaces);
+    });
+
+    // Some browsers expose beforeprint — run the collapse one more time.
+    window.addEventListener('beforeprint', collapseWrappedSpaces);
 
     const PRESETS = [
       ['noun',          'no-hom'],
@@ -467,7 +577,8 @@
       ['plural + acc',  'no-hom-in-mó-om'],
       ['fraction',      'na-du na-tri-er'],
       ['full clause',   'no-hom no-dom-om ve-vid-as'],
-      ['with pauses',   'pro-mi pro-ti ve-am-as po-ne|||ko-sed|pro-ti po-ci po-ne ve-viv-as'],
+      ['all pauses',    'pro-mi pro-ti ve-am-as po-ne|||ko-sed|pro-ti ve-viv-as po-ci po-ne||||'],
+      ['punctuation',   'no-hom no-dom-om ve-vid-as! pro-ti ve-viv-as po-ci? no-hom: pa-grand-as.'],
     ];
 
     const presetsEl = document.getElementById('presets');

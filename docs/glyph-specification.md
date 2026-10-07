@@ -1,9 +1,9 @@
-# Specification Version 1.4 
+# Specification Version 1.5
 
-**Specification Version:** 1.4  
+**Specification Version:** 1.5  
 **Status:** Graphics specification for the Gliph writing system.
 **Purpose:** Description of graphic atoms, slot-based modular cells, spatial composition rules, digital module integration, font engine specifications (FontForge), and machine processing formats (JSON).  
-**Update Date:** 2026-10-04  
+**Update Date:** 2026-10-07 
 
 ---
 

@@ -1,11 +1,11 @@
-# Specification Version 1.4
+# Specification Version 1.5
 
-**Standard Version:** 1.4   
+**Standard Version:** 1.5   
 **Status:** Personal design artifact. Not a proposal for adoption.
 **Purpose:** Reference guide to the philosophy, phonetics, morphology,
 syntax, prosody, and digital interfaces of the Nodal language, as
 designed by its author. 
-**Update Date:** 2026-10-03  
+**Update Date:**2026-10-07 
 
 ---
 
@@ -53,12 +53,36 @@ The Nodal alphabet consists of **32 letters** (10 vowels + 22 consonants). Every
 
 ### 2.3. Hierarchy of Syntactic Pauses
 
-To prevent slurring in spoken discourse, 3 levels of pauses are defined:
+To prevent slurring in spoken discourse, 4 levels of pauses are defined:
 
 * **Pause 0:** Inside a word and a wave morpheme cell.
 * **Micro-pause `|`:** Separates the head word with primary focus from secondary modifiers and background details.
 * **Medium Pause `||`:** Separates major syntactic blocks in SOV structure (Subject || Object || Verb).
-* **Inter-clause Pause `|||`:** Mandatory before conjunctions (`ko-`) and relative nodes (`to-`) at complex sentence boundaries.
+* **Inter-clause Pause `|||`:** Mandatory before conjunctions (`ko-`) and relative nodes (`to-`) at clause boundaries inside a single sentence.
+* **Sentence-final Pause `||||`:** Terminates a sentence. Never occurs inside a sentence; always closes it. In speech it is realized as the longest pause and a falling terminal contour.
+
+The pause level is encoded by the number of vertical bars: one, two, three, or three bars plus a terminal modifier (Section 2.4).
+
+### 2.4. Punctuation as Pause Modifier
+
+Punctuation marks are not written literally. They are **rendered as a pause of the appropriate level**, with the fourth element replacing the final bar:
+
+| Input | Rendered as | Bars | Modifier | Function |
+| :--- | :--- | :--- | :--- | :--- |
+| `,` | `\|` | 1 | — | micro-pause |
+| `;` | `\|\|` | 2 | — | medium pause |
+| `:` | `\|\|:` | 2 | two dots (bottom dot on slot [C]) | explanatory pause |
+| `.` | `\|\|\|\|` | 3 | horizontal bar | declarative sentence end |
+| `!` | `\|\|\|/` | 3 | rising slash | exclamative sentence end |
+| `?` | `\|\|\|\\` | 3 | falling backslash | interrogative sentence end |
+
+The literal forms `|`, `||`, `|||`, `||||` may also be typed directly; they render identically to `.`, `;`, `:`, `.` respectively where the bar count matches. This allows explicit prosodic transcription without punctuation.
+
+**Rule:** the bar count determines the pause **level**; the modifier determines the pause **type**. A modifier never appears without bars.
+
+### 2.5. Whitespace Around Punctuation
+
+Whitespace immediately preceding or following a punctuation mark or pause marker is not significant. Renderers suppress it: the punctuation mark or pause is rendered flush against the neighbouring morpheme or cell. Whitespace between words without intervening punctuation is preserved as a word separator.
 
 ---
 
@@ -281,7 +305,7 @@ Formed as adjectival modifiers:
 7. **Law of Suffix Ordering:** Suffixes attach strictly by rank (1➔2➔3➔4➔5➔6).
 8. **Law of Fractional Share:** All fractions and percentages are formed using suffix `-er-`.
 9. **Law of 3-Digit Module:** Numbers in Gliph cells group into 3-digit padded units.
-10. **Law of Acoustic Pauses:** Syntactic boundaries are delineated by pauses `|`, `||`, `|||`.
+10. **Law of Acoustic Pauses:** Syntactic boundaries are delineated by 4 pause levels `|`, `||`, `|||`, `||||`. The last is reserved for sentence termination; the other three operate inside a sentence. Punctuation marks are rendered as pauses, not as literal glyphs (Section 2.4).
 
 ---
 
@@ -289,9 +313,9 @@ Formed as adjectival modifiers:
 
 ### Analysis of Sample Sentence
 
-* **Text:** `pro-mi pro-ti ve-am-as po-ne ||| ko-sed | pro-ti po-ne ve-viv-as po-ci`
-* **Meaning:** "I do not love you, but you do not live here."
-* **Acoustic Score:** `pro-MI pro-TI ve-AM-as po-ne ||| ko-SED | pro-TI po-ne ve-VIV-as po-CI`
+* **Text:** `pro-mi pro-ti ve-am-as po-ne|||ko-sed|pro-ti ve-viv-as po-ci||||`
+* **Meaning:** "I do not love you, but you live here."
+* **Acoustic Score:** `pro-MI pro-TI ve-AM-as po-ne ||| ko-SED | pro-TI ve-VIV-as po-CI ||||`
 
 #### Structural Breakdown
 
@@ -306,6 +330,7 @@ Formed as adjectival modifiers:
 * `po-CI` — adverbial of place (here)
 * `po-ne` — negative particle modifying location or verb
 * `ve-VIV-as` — verb in present tense (live), concluding clause in SOV order
+* `||||` — sentence-final pause, closes the whole utterance
 
 ---
 
