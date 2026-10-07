@@ -1,5 +1,7 @@
 [![Validate dictionary](https://github.com/tsar8/nodal/actions/workflows/validate.yml/badge.svg)](https://github.com/tsar8/nodal/actions/workflows/validate.yml)
 
+**Live:** https://tsar8.github.io/nodal/
+
 # Nodal
 
 Nodal is a personal design exploration of what a language could look like
@@ -20,7 +22,7 @@ can exist, and a foundation for anyone who wants to take it further.
 - **Gliph** — the slot-based modular writing system.
   → `docs/Nodal_glyph-specification.md`
 - **Web renderer** — live demo of the Gliph cells.
-  → https://tsar8.github.io/nodal/
+  → https://tsar8.github.io/nodal/demo.html
 
 ## Background
 
